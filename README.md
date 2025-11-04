@@ -112,11 +112,7 @@ java -jar target/waste-management-backend-0.0.1-SNAPSHOT.jar
 * `PUT /waste/{id}` – Update status
 * `DELETE /waste/{id}` – Delete waste
 
-**Transactions**
 
-* `POST /transactions/pay` – Make payment
-* `POST /transactions/refund` – Request refund
-* `GET /transactions/{userId}` – Transaction history
 
 **Users**
 
