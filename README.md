@@ -1,7 +1,7 @@
 
-# Trash2Cash Backend
+# RecycleUp Backend
 
-**Backend for Trash2Cash**, a waste management mobile app connecting **Waste Generators** with **Waste Recyclers**. Built with **Spring Boot**, **PostgreSQL**, and integrated with payment gateways and notifications, this backend supports authentication, waste management, transactions, and notifications for a sustainable and economically beneficial waste ecosystem.
+**Backend for RecycleUp**, a waste management mobile app connecting **Waste Generators** with **Waste Recyclers**. Built with **Spring Boot**, **PostgreSQL**, and integrated with payment gateways and notifications, this backend supports authentication, waste management, transactions, and notifications for a sustainable and economically beneficial waste ecosystem.
 
 ---
 
