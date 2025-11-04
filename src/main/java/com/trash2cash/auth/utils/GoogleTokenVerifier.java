@@ -27,7 +27,6 @@ public class GoogleTokenVerifier {
                 .build();
     }
 
-    /** Returns payload if valid, else throws IllegalArgumentException */
     public GoogleIdToken.Payload verify(String idTokenString) {
         try {
             GoogleIdToken idToken = verifier.verify(idTokenString);

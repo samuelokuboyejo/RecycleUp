@@ -7,8 +7,12 @@ import com.trash2cash.exceptions.WalletNotFoundException;
 import com.trash2cash.users.dto.*;
 import com.trash2cash.users.enums.Status;
 import com.trash2cash.users.enums.UserRole;
+import com.trash2cash.users.model.Device;
 import com.trash2cash.users.model.User;
+import com.trash2cash.users.repo.DeviceRepository;
 import com.trash2cash.users.repo.UserRepository;
+import com.trash2cash.users.utils.DeviceResponse;
+import com.trash2cash.users.utils.PinExistResponse;
 import com.trash2cash.users.utils.UploadResponse;
 import com.trash2cash.users.utils.UserProfileResponse;
 import com.trash2cash.wallet.WalletDTO;
@@ -22,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -29,6 +34,7 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
+    private final DeviceRepository deviceRepository;
 
 
     public UserProfileDto getProfile(String email) {
@@ -171,6 +177,27 @@ public class UserService {
 //        );
         return AccountStatusResponse.builder()
                 .message( "User account " + status.name().toLowerCase() + " successfully.")
+                .build();
+    }
+
+    public DeviceResponse getUserDeviceId(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+        Device device = deviceRepository.findByUser(user);
+        String deviceId = device.getDeviceId();
+        return DeviceResponse.builder()
+                .deviceId(deviceId)
+                .build();
+    }
+
+    public PinExistResponse pinExist(String email){
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
+
+        boolean pinExist = user.getPinHash() != null && !user.getPinHash().isEmpty();
+
+        return PinExistResponse.builder()
+                .pinExist(pinExist)
                 .build();
     }
 

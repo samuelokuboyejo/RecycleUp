@@ -34,10 +34,28 @@ public class WasteListingController {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     @Operation(
-            summary = "Create a new listing",
-            description = "Allows an authenticated user to upload a waste listing with metadata and an image file" + "⚠️ Requires a valid Bearer access token in the Authorization header.",
+            summary = "Create a new waste listing with AI verification",
+            description = """
+        Allows an authenticated user to create a new waste listing by uploading an image and metadata.
+
+        **AI Verification Features:**
+        - Uses AWS Rekognition to analyze the uploaded image and automatically detect the waste category (Plastic, Metal, Glass).
+        - Checks image authenticity using the SightEngine API to ensure it is not AI-generated or fabricated.
+        - Performs a reverse image search via SerpAPI (Google Reverse Image) to confirm that the image was not downloaded or reused from the internet.
+        - Only listings with authentic (real, unique) images proceed successfully. Reused or AI-generated images trigger an error message:
+          > `"The uploaded image appears to be AI-generated or reused (found on the internet). Please upload a real photo of your waste."`
+        - The system logs AI confidence scores and category matches to improve accuracy and transparency.
+
+         **Technical Notes:**
+        - AI checks run automatically upon upload before the listing is persisted.
+        - Images are stored on Cloudinary regardless of reuse status for audit trail purposes.
+        - Privileged users or admins can view verification results and confidence metrics.
+
+        🔐 Requires a valid Bearer token in the `Authorization` header.
+        """,
             security = { @SecurityRequirement(name = "bearerAuth") }
     )
+
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Listing created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid input"),
@@ -54,7 +72,7 @@ public class WasteListingController {
             @Parameter(description = "Image file to upload", required = true)
             @RequestPart("file") MultipartFile file
     ) throws IOException {
-        // Convert the JSON string to your DTO
+        // Convert the JSON string to DTO
         WasteListingRequest request = new ObjectMapper().readValue(requestJson, WasteListingRequest.class);
         if (principal == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

@@ -59,4 +59,11 @@ public class WasteListing {
 
     private LocalDateTime scheduledDateTime;
 
+
+
+    private boolean aiVerified;
+    private String aiDetectedCategory;
+    private double confidenceScore;
+    private boolean isAuthenticImage;
+
 }

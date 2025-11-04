@@ -40,4 +40,5 @@ public class PointsService {
         int points = calculatePoints(weightKg);
         awardPoints(userId, points, "Created a listing of " + weightKg + " kg");
     }
+
 }

@@ -1,5 +1,6 @@
 package com.trash2cash.waste;
 
+import com.trash2cash.dto.AIResult;
 import com.trash2cash.impact.ImpactStatsService;
 import com.trash2cash.notifications.NotificationService;
 import com.trash2cash.notifications.NotificationUtils;
@@ -12,6 +13,7 @@ import com.trash2cash.transactions.TransactionRepository;
 import com.trash2cash.users.dto.WasteListingRequest;
 import com.trash2cash.users.enums.TransactionType;
 import com.trash2cash.users.enums.WasteStatus;
+import com.trash2cash.users.enums.WasteType;
 import com.trash2cash.users.enums.WithdrawalStatus;
 import com.trash2cash.users.model.User;
 import com.trash2cash.users.repo.UserRepository;
@@ -43,13 +45,20 @@ public class WasteListingService {
     private final PricingService pricingService;
     private final PointsService pointsService;
     private final ImpactStatsService impactStatsService;
+    private final AIService aiService;
     private  final WalletRepository walletRepository;
     private  final TransactionRepository transactionRepository;
 
+    @Transactional
     public ListingResponse createListing(WasteListingRequest request, MultipartFile file, String email) throws IOException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new EntityNotFoundException("User not found"));
         UploadResponse uploadResponse = cloudinaryService.upload(file);
+        AIResult aiResult= aiService.verifyImage(uploadResponse.getSecureUrl(), String.valueOf(request.getType()));
+        if (!aiResult.isAuthenticImage()) {
+            throw new IllegalArgumentException("The uploaded image appears to be AI-generated or reused (found on the internet). Please upload a real photo of your waste.");
+        }
+
         BigDecimal amount = pricingService.calculateAmount(request.getType(), request.getWeight());
 
         var listing = WasteListing.builder()
@@ -61,6 +70,10 @@ public class WasteListingService {
                 .weight(request.getWeight())
                 .contactPhone(request.getContactPhone())
                 .imageUrl(uploadResponse.getSecureUrl())
+                .aiVerified(aiResult.isAiVerified())
+                .aiDetectedCategory(String.valueOf(aiResult.getDetectedCategory()))
+                .confidenceScore(aiResult.getConfidenceScore())
+                .isAuthenticImage(aiResult.isAuthenticImage())
                 .createdBy(user.getId())
                 .status(WasteStatus.OPEN)
                 .createdAt(LocalDateTime.now())
@@ -95,6 +108,10 @@ public class WasteListingService {
                 .status(savedListing.getStatus())
                 .createdBy(savedListing.getCreatedBy())
                 .amount(savedListing.getAmount())
+                .aiVerified(savedListing.isAiVerified())
+                .detectedCategory(WasteType.valueOf(savedListing.getAiDetectedCategory()))
+                .confidenceScore(savedListing.getConfidenceScore())
+                .isAuthenticImage(savedListing.isAuthenticImage())
                 .build();
     }
 

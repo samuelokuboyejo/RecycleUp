@@ -27,4 +27,9 @@ public class ListingResponse {
     private Long createdBy;
     private BigDecimal amount;
 
+
+    private boolean aiVerified;
+    private WasteType detectedCategory;
+    private double confidenceScore;
+    private boolean isAuthenticImage;
 }

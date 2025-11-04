@@ -8,6 +8,8 @@ import com.trash2cash.users.dto.UserProfileDto;
 import com.trash2cash.users.model.UserInfoUserDetails;
 import com.trash2cash.users.service.UserService;
 import com.trash2cash.users.utils.CustomUserDetails;
+import com.trash2cash.users.utils.DeviceResponse;
+import com.trash2cash.users.utils.PinExistResponse;
 import com.trash2cash.users.utils.UserProfileResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -185,4 +187,68 @@ public class UserController {
     }
 
 
+    @GetMapping("/me/deviceId")
+    @PreAuthorize("isAuthenticated()")
+    @Operation(
+            summary = "Retrieve the current user's registered device ID",
+            description = """
+        Returns the device information associated with the authenticated user's account. 
+        ⚠️ Requires a valid Bearer access token in the Authorization header.
+        """
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Device information retrieved successfully",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = DeviceResponse.class)
+                    )
+            ),
+            @ApiResponse(responseCode = "401", description = "Unauthorized - user not authenticated"),
+            @ApiResponse(responseCode = "404", description = "No registered device found for this user")
+    })
+    public ResponseEntity<DeviceResponse> getUserDeviceId ( @AuthenticationPrincipal UserInfoUserDetails principal){
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String email = principal.getUsername();
+        return ResponseEntity.ok(userService.getUserDeviceId(email));
+    }
+
+
+    @Operation(
+            summary = "Check if user PIN exists",
+            description = "Verifies whether the authenticated user has already created a PIN. " +
+                    "This endpoint requires authentication (JWT Bearer token).",
+            security = @SecurityRequirement(name = "bearerAuth"),
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "PIN existence successfully retrieved",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = PinExistResponse.class)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "Unauthorized – missing or invalid authentication token",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "User not found",
+                            content = @Content
+                    )
+            }
+    )
+    @GetMapping("/pin-exist")
+    public ResponseEntity<PinExistResponse> pinExist (@AuthenticationPrincipal UserInfoUserDetails principal){
+        if (principal == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String email = principal.getUsername();
+        return ResponseEntity.ok(userService.pinExist(email));
+    }
 }

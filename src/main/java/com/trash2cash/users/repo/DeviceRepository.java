@@ -23,4 +23,6 @@ public interface DeviceRepository extends JpaRepository<Device, Long> {
     @Query("SELECT d.fcmToken FROM Device d WHERE d.user.id IN :userIds AND d.fcmToken IS NOT NULL")
     List<String> findFcmTokensByUserIds(@Param("userIds") List<Long> userIds);
 
+    Device findByUser(User user);
+
 }

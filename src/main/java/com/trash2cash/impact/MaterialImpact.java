@@ -1,5 +1,6 @@
 package com.trash2cash.impact;
 
+import com.trash2cash.users.enums.WasteType;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,8 +17,10 @@ public class MaterialImpact {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
+    @Enumerated(EnumType.STRING)
     @Column(unique = true)
-    private String materialType;
+    private WasteType materialType;
+
     private double co2PerKg;
     private double energyPerKg;
     private double waterPerKg;
